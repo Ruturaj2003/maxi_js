@@ -7,6 +7,7 @@ const confirmMoiveButton = cancelAddMovieButton.nextElementSibling;
 const userInputs = addMoiveModal.querySelectorAll('input');
 const entryTextSection = document.getElementById('entry-text');
 const moives = []; //we will add objects in the array
+const deleteMoiveModal = document.getElementById('delete-modal');
 const updateUI = () => {
     if (moives.length === 0) {
         entryTextSection.style.display = 'block';
@@ -15,7 +16,12 @@ const updateUI = () => {
     }
 };
 
-const deleteMoiveHandler = (moiveId) => {
+const cancelMovieDeletionModal = () => {
+    toggleBackdropHandler();
+    deleteMoiveModal.classList.remove('visible');
+};
+
+const deleteMoive = (moiveId) => {
     let moiveIndex = 0;
     for (const moive of moives) {
         if (moive.id === moiveId) {
@@ -28,6 +34,26 @@ const deleteMoiveHandler = (moiveId) => {
 
     const listRoot = document.getElementById('movie-list');
     listRoot.children[moiveIndex].remove();
+    cancelMovieDeletionModal();
+};
+
+const deleteMoiveHandler = (moiveId) => {
+    deleteMoiveModal.classList.add('visible');
+    toggleBackdropHandler();
+    const cancelDeletionButton =
+        deleteMoiveModal.querySelector('.btn--passive');
+    let confirmDeletionButton = deleteMoiveModal.querySelector('.btn--danger');
+
+    confirmDeletionButton.replaceWith(confirmDeletionButton.cloneNode(true));
+    confirmDeletionButton = deleteMoiveModal.querySelector('.btn--danger');
+
+    cancelDeletionButton.removeEventListener('click', cancelMovieDeletionModal);
+
+    cancelDeletionButton.addEventListener('click', cancelMovieDeletionModal);
+    confirmDeletionButton.addEventListener(
+        'click',
+        deleteMoive.bind(null, moiveId)
+    );
 };
 
 const renderNewMoiveElement = (id, title, imageUrl, rating) => {
@@ -53,13 +79,23 @@ const renderNewMoiveElement = (id, title, imageUrl, rating) => {
     listRoot.append(newMoiveElement);
 };
 
+const closeMoiveModal = () => {
+    addMoiveModal.classList.remove('visible');
+};
+
+const showMoiveModal = () => {
+    addMoiveModal.classList.add('visible');
+    toggleBackdropHandler();
+};
+
 const toggleBackdropHandler = () => {
     backdrop.classList.toggle('visible');
 };
 
 const backdropClickHandler = () => {
-    addMoiveModal.classList.toggle('visible');
-    toggleBackdropHandler();
+    closeMoiveModal();
+    cancelMovieDeletionModal();
+    clearMoiveInput();
 };
 
 const clearMoiveInput = () => {
@@ -69,7 +105,7 @@ const clearMoiveInput = () => {
 };
 
 const cancelAddMovieHandler = () => {
-    addMoiveModal.classList.toggle('visible');
+    closeMoiveModal();
     toggleBackdropHandler();
     clearMoiveInput();
 };
@@ -79,7 +115,6 @@ const addMoiveHandler = () => {
     const imgUrlValue = userInputs[1].value;
     const ratingValue = userInputs[2].value;
     //trim will remove excess whitespace
-
     if (
         titleValue.trim() === '' ||
         imgUrlValue.trim() === '' ||
@@ -90,7 +125,6 @@ const addMoiveHandler = () => {
         alert('Please enter valid values (rating between 1 and 5)');
         return;
     }
-
     const newMoive = {
         id: Math.random().toString,
         title: titleValue,
@@ -99,7 +133,9 @@ const addMoiveHandler = () => {
     };
     moives.push(newMoive);
     console.log(moives);
-    backdropClickHandler(); //I am using this as i am lazy and dont want to create another function
+    // backdropClickHandler(); //I am using this as i am lazy and dont want to create another function
+    closeMoiveModal();
+    toggleBackdropHandler();
     clearMoiveInput();
     renderNewMoiveElement(
         newMoive.id,
