@@ -15,7 +15,22 @@ const updateUI = () => {
     }
 };
 
-const renderNewMoiveElement = (title, imageUrl, rating) => {
+const deleteMoiveHandler = (moiveId) => {
+    let moiveIndex = 0;
+    for (const moive of moives) {
+        if (moive.id === moiveId) {
+            break;
+        }
+        moiveIndex++;
+    }
+    moives.splice[(moiveIndex, 1)];
+    //you can move list root to a global level if u wish but here ill just make one more since its just 2
+
+    const listRoot = document.getElementById('movie-list');
+    listRoot.children[moiveIndex].remove();
+};
+
+const renderNewMoiveElement = (id, title, imageUrl, rating) => {
     const newMoiveElement = document.createElement('li');
     newMoiveElement.className = 'moive-element';
     //Back tick is used for 1) Multi line    2) data injection
@@ -30,6 +45,10 @@ const renderNewMoiveElement = (title, imageUrl, rating) => {
             <p> ${rating}/5 stars </p>        
         </div>
     `;
+    newMoiveElement.addEventListener(
+        'click',
+        deleteMoiveHandler.bind(null, id)
+    );
     const listRoot = document.getElementById('movie-list');
     listRoot.append(newMoiveElement);
 };
@@ -73,6 +92,7 @@ const addMoiveHandler = () => {
     }
 
     const newMoive = {
+        id: Math.random().toString,
         title: titleValue,
         image: imgUrlValue,
         rating: ratingValue,
@@ -81,7 +101,12 @@ const addMoiveHandler = () => {
     console.log(moives);
     backdropClickHandler(); //I am using this as i am lazy and dont want to create another function
     clearMoiveInput();
-    renderNewMoiveElement(newMoive.title, newMoive.image, newMoive.rating);
+    renderNewMoiveElement(
+        newMoive.id,
+        newMoive.title,
+        newMoive.image,
+        newMoive.rating
+    );
     updateUI();
 };
 
