@@ -35,6 +35,7 @@ const deleteMoive = (moiveId) => {
     const listRoot = document.getElementById('movie-list');
     listRoot.children[moiveIndex].remove();
     cancelMovieDeletionModal();
+    updateUI();
 };
 
 const deleteMoiveHandler = (moiveId) => {
