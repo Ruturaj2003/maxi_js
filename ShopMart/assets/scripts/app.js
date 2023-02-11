@@ -13,6 +13,11 @@ class ProductItem {
     constructor(product) {
         this.product = product;
     }
+
+    addToCart() {
+        console.log(`Adding ${this.product.title} to cart`);
+    }
+
     render() {
         const prodEl = document.createElement('li');
         prodEl.className = 'product-item';
@@ -34,6 +39,10 @@ class ProductItem {
                     </button>
                 </div>
             </div>`;
+        const addCartButton = prodEl.querySelector('button');
+        //It will tell JS that addTocart refets to current one and not anyother that are alreay created
+        //Here we used bind this as this would refer to addCartButton and not Class;
+        addCartButton.addEventListener('click', this.addToCart.bind(this));
         return prodEl;
     }
 }
