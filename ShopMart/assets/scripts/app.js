@@ -7,6 +7,24 @@ class Product {
     }
 }
 
+class ShoppingCart {
+    items = [];
+
+    render() {
+        const cartEl = document.createElement('section');
+        cartEl.innerHTML = `
+        <h2>
+            Total: \$ ${0}
+        </h2>
+        <button>
+            Order Now!
+        </button>
+        `;
+        cartEl.className = 'cart';
+        return cartEl;
+    }
+}
+
 //Below Class is used in ProductList Class
 class ProductItem {
     //This class is for rendering a single Item
@@ -67,7 +85,7 @@ class ProductList {
     //Below is method shorthand notation
     render() {
         //Dom manupulation of sorts below
-        const renderHook = document.getElementById('app');
+
         const prodList = document.createElement('ul');
         //Styling the un-ordered list
         prodList.className = 'product-list';
@@ -80,9 +98,23 @@ class ProductList {
             const prodEl = productItem.render();
             prodList.append(prodEl);
         }
-        renderHook.append(prodList);
+        return prodList;
     }
 }
 
-const productList = new ProductList();
-productList.render();
+//This is combination of Cart and Product list
+class Shop {
+    render() {
+        // Main Hook is now here as here we will be rendering everything
+        const renderHook = document.getElementById('app');
+        const cart = new ShoppingCart();
+        const cartEl = cart.render();
+        const productList = new ProductList();
+        const prodListEl = productList.render();
+        renderHook.append(cartEl);
+        renderHook.append(prodListEl);
+    }
+}
+
+const shop = new Shop();
+shop.render();
