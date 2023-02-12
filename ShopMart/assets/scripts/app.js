@@ -204,7 +204,7 @@ class Shop {
 }
 
 class App {
-    //It is optional; For readability
+    //It is optional; For readability.
     static cart;
 
     static init() {
