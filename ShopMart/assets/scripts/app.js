@@ -15,9 +15,15 @@ class ElementAttribute {
 }
 
 class Component {
-    constructor(renderHookId) {
+    constructor(renderHookId, shouldRender = true) {
         this.hookId = renderHookId;
+        if (shouldRender) {
+            this.render();
+        }
     }
+    //Below is for someone to know that there is a method render
+    //Basically the render method will be fully Overwritten by render of sub-Classes
+    render() {}
     createRootElement(tag, cssClasses, attributes) {
         const rootElement = document.createElement(tag);
         //It will check for a truthy value
@@ -76,6 +82,12 @@ class ShoppingCart extends Component {
         //This will trigger the setter
         this.cartItems = updatedItems;
     }
+
+    orderProducts(product) {
+        console.log('Ordering in PROGRESS!!!');
+        console.log(this.items);
+    }
+
     render() {
         //Inheriting
         const cartEl = this.createRootElement('section', 'cart');
@@ -89,6 +101,9 @@ class ShoppingCart extends Component {
         </button>
         `;
         //cartEl.className = 'cart';
+        const orderButton = cartEl.querySelector('button');
+        orderButton.addEventListener('click', this.orderProducts.bind(this));
+
         this.totalOutput = cartEl.querySelector('h2');
 
         //return cartEl; No longer needed as it was removed from Shop
@@ -99,8 +114,9 @@ class ShoppingCart extends Component {
 class ProductItem extends Component {
     //This class is for rendering a single Item
     constructor(product, renderHookId) {
-        super(renderHookId);
+        super(renderHookId, false);
         this.product = product;
+        this.render();
     }
 
     addToCart() {
@@ -139,23 +155,37 @@ class ProductItem extends Component {
 }
 
 class ProductList extends Component {
-    products = [
-        new Product(
-            'A Carpet',
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYMXxljApMIXoEPr-aztx4ehOKmIZjWOqBUw&usqp=CAU',
-            'A beautiful carpet',
-            '19.99'
-        ),
-
-        new Product(
-            'A Expensive Carpet',
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYMXxljApMIXoEPr-aztx4ehOKmIZjWOqBUw&usqp=CAU',
-            'Same carpet as above but EXPENSIVE!!!',
-            '89.99'
-        ),
-    ];
+    //Private prop
+    #products = [];
     constructor(renderHookId) {
-        super(renderHookId);
+        super(renderHookId, false);
+        this.render();
+        this.#fetchProducts();
+    }
+
+    #fetchProducts() {
+        this.#products = [
+            new Product(
+                'A Carpet',
+                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYMXxljApMIXoEPr-aztx4ehOKmIZjWOqBUw&usqp=CAU',
+                'A beautiful carpet',
+                '19.99'
+            ),
+
+            new Product(
+                'A Expensive Carpet',
+                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYMXxljApMIXoEPr-aztx4ehOKmIZjWOqBUw&usqp=CAU',
+                'Same carpet as above but EXPENSIVE!!!',
+                '89.99'
+            ),
+        ];
+        this.renderProducts();
+    }
+
+    renderProducts() {
+        for (const prod of this.#products) {
+            new ProductItem(prod, 'prod-list');
+        }
     }
     //Below is method shorthand notation
     render() {
@@ -166,35 +196,47 @@ class ProductList extends Component {
         this.createRootElement('ul', 'product-list', [
             new ElementAttribute('id', 'prod-list'),
         ]);
+
+        if (this.#products && this.#products.length > 0) {
+            this.renderProducts();
+        }
+
         //We made a Id here so we can use it in componet as Rendering Hook
         //prodList.id = 'prod-list';
         //Styling the un-ordered list
         //prodList.className = 'product-list';
 
         //Creating each product in DOM as a list-item
-        for (const prod of this.products) {
-            //Attaching the each product in ul
-            const productItem = new ProductItem(prod, 'prod-list');
-            productItem.render();
+        // for (const prod of this.products) {
+        //     new ProductItem(prod, 'prod-list');
 
-            //we need to call our render to return the obj
-            //const prodEl = productItem.render();
-            //prodList.append(prodEl);
-        }
+        //Attaching the each product in ul
+        //const productItem = new ProductItem(prod, 'prod-list');
+        //productItem.render();
+        //we need to call our render to return the obj
+        //const prodEl = productItem.render();
+        //prodList.append(prodEl);
+        //}
         //return prodList;
     }
 }
 
 //This is combination of Cart and Product list
-class Shop {
+class Shop extends Component {
+    constructor() {
+        super();
+    }
     render() {
         // Main Hook is now here as here we will be rendering everything
         //const renderHook = document.getElementById('app');
         //Shop has its own cart now {I guess} and we can acess it
         this.cart = new ShoppingCart('app');
-        this.cart.render();
-        const productList = new ProductList('app');
-        productList.render();
+        new ProductList('app');
+
+        //this.cart.render();
+        //We will not use const since the only use was render and that is done
+        //const productList = new ProductList('app');
+        //productList.render();
         //renderHook.append(prodListEl);
         //ProdListEl is removeed as we no longer get any retrun value
         //const prodListEl = productList.render();
@@ -209,7 +251,7 @@ class App {
 
     static init() {
         const shop = new Shop();
-        shop.render();
+        //shop.render();
         //Render should be first since cart is in render and till
         //we dont call render there wont be any cart
         this.cart = shop.cart;
