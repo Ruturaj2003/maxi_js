@@ -18,19 +18,77 @@ class DOMHelper {
     }
 }
 
-class Tooltip {}
+class Component {
+    constructor(hostElementId, insertBefore = false) {
+        if (hostElementId) {
+            this.hostElement = hostElementId;
+        } else {
+            this.hostElement = document.body;
+        }
+        this.insertBefore = insertBefore;
+    }
+    detach = () => {
+        if (this.element) {
+            this.element.remove();
+        }
+    };
+
+    show() {
+        // document.body.append(this.element);
+        this.hostElement.insertAdjacentElement(
+            this.insertBefore ? 'afterbegin' : 'beforeend',
+            this.element
+        );
+    }
+}
+
+class Tooltip extends Component {
+    constructor(closeNotifierFunction) {
+        super();
+        this.closeNoti = closeNotifierFunction;
+        this.render();
+    }
+    closeTooltip = () => {
+        this.detach();
+    };
+
+    render() {
+        const tooltipElement = document.createElement('div');
+        tooltipElement.className = 'card';
+        tooltipElement.textContent = 'DUMMY';
+        tooltipElement.addEventListener('click', this.closeTooltip);
+        this.element = tooltipElement;
+    }
+}
 
 class ProjectItem {
+    hasActiveToolTip = false;
     // This class Will manage individual element`s DOM Nodes
     constructor(id, updateProjectListsFunction, type) {
         // To save ID that we are geting as parameter in a instance
         this.id = id;
         this.updateProjectListsHandler = updateProjectListsFunction;
+
         this.connectMoreInfoButton();
         this.connectSwitchButton();
     }
 
-    connectMoreInfoButton() {}
+    showMoreInfoHandler() {
+        if (this.hasActiveToolTip) {
+            return;
+        }
+        const tooltip = new Tooltip(() => {
+            this.hasActiveToolTip = false;
+        });
+        tooltip.show();
+        this.hasActiveToolTip = true;
+    }
+
+    connectMoreInfoButton() {
+        const projectItemElement = document.getElementById(this.id);
+        const moreInfoBtn = projectItemElement.querySelector('button');
+        moreInfoBtn.addEventListener('click', this.showMoreInfoHandler);
+    }
 
     connectSwitchButton(type) {
         const projectItemElement = document.getElementById(this.id);
