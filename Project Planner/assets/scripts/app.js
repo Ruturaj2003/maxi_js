@@ -43,9 +43,10 @@ class Component {
 }
 
 class Tooltip extends Component {
-    constructor(closeNotifierFunction) {
+    constructor(closeNotifierFunction, extraInfo) {
         super();
         this.closeNoti = closeNotifierFunction;
+        this.text = extraInfo;
         this.render();
     }
     closeTooltip = () => {
@@ -55,7 +56,7 @@ class Tooltip extends Component {
     render() {
         const tooltipElement = document.createElement('div');
         tooltipElement.className = 'card';
-        tooltipElement.textContent = 'DUMMY';
+        tooltipElement.textContent = this.text;
         tooltipElement.addEventListener('click', this.closeTooltip);
         this.element = tooltipElement;
     }
@@ -77,9 +78,12 @@ class ProjectItem {
         if (this.hasActiveToolTip) {
             return;
         }
+        const projectElement = document.getElementById(this.id);
+        const tooltipText = projectElement.dataset.extraInfo;
+
         const tooltip = new Tooltip(() => {
             this.hasActiveToolTip = false;
-        });
+        }, tooltipText);
         tooltip.show();
         this.hasActiveToolTip = true;
     }
@@ -87,7 +91,10 @@ class ProjectItem {
     connectMoreInfoButton() {
         const projectItemElement = document.getElementById(this.id);
         const moreInfoBtn = projectItemElement.querySelector('button');
-        moreInfoBtn.addEventListener('click', this.showMoreInfoHandler);
+        moreInfoBtn.addEventListener(
+            'click',
+            this.showMoreInfoHandler.bind(this)
+        );
     }
 
     connectSwitchButton(type) {
@@ -161,6 +168,7 @@ class App {
 
         //It wont execute the function just point at it
         // Bind is used as ,If it wont be used it will refer to the one calling
+        //It is an example of callback Function
         activeProjectsList.setSwitchHandlerFunction(
             finishedProjectsList.addProject.bind(finishedProjectsList)
         );
