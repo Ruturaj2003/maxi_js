@@ -21,7 +21,7 @@ class DOMHelper {
 class Component {
     constructor(hostElementId, insertBefore = false) {
         if (hostElementId) {
-            this.hostElement = hostElementId;
+            this.hostElement = document.getElementById(hostElementId);
         } else {
             this.hostElement = document.body;
         }
@@ -43,8 +43,8 @@ class Component {
 }
 
 class Tooltip extends Component {
-    constructor(closeNotifierFunction, extraInfo) {
-        super();
+    constructor(closeNotifierFunction, extraInfo, hostElementId) {
+        super(hostElementId);
         this.closeNoti = closeNotifierFunction;
         this.text = extraInfo;
         this.render();
@@ -57,6 +57,29 @@ class Tooltip extends Component {
         const tooltipElement = document.createElement('div');
         tooltipElement.className = 'card';
         tooltipElement.textContent = this.text;
+        console.log(this.hostElement.getBoundingClientRect());
+
+        //Pos from 0,0 to the left Most point of our Element
+        // With these Two we get X and Y co ordinates of our Element
+        const hostElPosLeft = this.hostElement.offsetLeft;
+        const hostElPosTop = this.hostElement.offsetTop;
+        //To Help us Better Postion the toolTip
+        //Client Height is used to get HEight of the content , offset aslo could be used but we have no borders
+        const hostElPosHeight = this.hostElement.clientHeight;
+        //Parent Elment to select the Container
+        const parentElemntScrolling = this.hostElement.parentElement.scrollTop;
+
+        //The Values which we will work here will always be pixels since we fetch them as pixels even though they are styled with Rem
+        //These are read-only Values
+        const x = hostElPosLeft + 20;
+        const y = hostElPosTop + hostElPosHeight - parentElemntScrolling - 10;
+
+        //Wrting Px is Mandatory For It to Work
+
+        tooltipElement.style.position = 'absolute';
+        tooltipElement.style.left = x + 'px';
+        tooltipElement.style.top = y + 'px';
+
         tooltipElement.addEventListener('click', this.closeTooltip);
         this.element = tooltipElement;
     }
@@ -81,9 +104,13 @@ class ProjectItem {
         const projectElement = document.getElementById(this.id);
         const tooltipText = projectElement.dataset.extraInfo;
 
-        const tooltip = new Tooltip(() => {
-            this.hasActiveToolTip = false;
-        }, tooltipText);
+        const tooltip = new Tooltip(
+            () => {
+                this.hasActiveToolTip = false;
+            },
+            tooltipText,
+            this.id
+        );
         tooltip.show();
         this.hasActiveToolTip = true;
     }
