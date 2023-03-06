@@ -1,6 +1,8 @@
 //JSON-JavaScript Object Notation
 const listElelment = document.querySelector('.posts');
 const postTemplate = document.getElementById('single-post');
+const form = document.querySelector('#new-post form');
+const fetchButton = document.querySelector('#available-posts button');
 
 function sendHttpRequest(method, url, data = null) {
     const promise = new Promise((res, rej) => {
@@ -54,5 +56,18 @@ async function createPost(title, content) {
 
     sendHttpRequest('POST', 'https://jsonplaceholder.typicode.com/posts', post);
 }
-fetchPosts();
+
+fetchButton.addEventListener('click', fetchPosts);
+
+form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const enteredTitle = event.target.querySelector('#title').value;
+    const enteredContent = event.target.querySelector('#content').value;
+
+    createPost(enteredTitle, enteredContent);
+
+    console.log(event.target);
+    console.log(event.currentTarget);
+});
+
 createPost('DUMMY', 'adssafa');
