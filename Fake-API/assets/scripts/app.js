@@ -1,49 +1,53 @@
-//JSON-JavaScript Object Notation
-const listElelment = document.querySelector('.posts');
+const listElement = document.querySelector('.posts');
 const postTemplate = document.getElementById('single-post');
 const form = document.querySelector('#new-post form');
 const fetchButton = document.querySelector('#available-posts button');
+const postList = document.querySelector('ul');
 
-function sendHttpRequest(method, url, data = null) {
-    const promise = new Promise((res, rej) => {
-        //This "Object" will allow me to send HTTP requests which is built into the browser
+function sendHttpRequest(method, url, data) {
+    const promise = new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
-        //Configuration of object
-        //With open alone no network activity will be started
         xhr.open(method, url);
-        //We can use this to parse it behind the scenes
+
         xhr.responseType = 'json';
 
-        //AddEVLis can also be used
         xhr.onload = function () {
-            res(xhr.response);
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(xhr.response);
+            } else {
+                reject(new Error('Something went wrong!'));
+            }
+            // const listOfPosts = JSON.parse(xhr.response);
         };
+
+        xhr.onerror = function () {
+            reject(new Error('Failed to send request!'));
+        };
+
         xhr.send(JSON.stringify(data));
     });
+
     return promise;
 }
 
-function fetchPosts() {
-    sendHttpRequest('GET', 'https://jsonplaceholder.typicode.com/posts').then(
-        (responseData) => {
-            // console.log(xhr.response);
-            //Stringyfiy helpls convert JS data to JSON data
-            //Parse helps converting JSON data to JS data
-            //const listOfPosts = JSON.parse(xhr.response);
-            const listOfPosts = responseData;
-            //We are using the for loop here since it is async code and if the loop is outside it may or maynot have the data available,
-            //Here it is garented that the data will be available
-            for (const post of listOfPosts) {
-                //Replicate temp for every post
-                const postEl = document.importNode(postTemplate.content, true);
-                postEl.querySelector('h2').textContent =
-                    post.title.toUpperCase();
-                postEl.querySelector('p').textContent = post.body;
-                listElelment.append(postEl);
-            }
+async function fetchPosts() {
+    try {
+        const responseData = await sendHttpRequest(
+            'GET',
+            'https://jsonplaceholder.typicode.com/pos'
+        );
+        const listOfPosts = responseData;
+        for (const post of listOfPosts) {
+            const postEl = document.importNode(postTemplate.content, true);
+            postEl.querySelector('h2').textContent = post.title.toUpperCase();
+            postEl.querySelector('p').textContent = post.body;
+            postEl.querySelector('li').id = post.id;
+            listElement.append(postEl);
         }
-    );
+    } catch (error) {
+        alert(error.message);
+    }
 }
 
 async function createPost(title, content) {
@@ -58,16 +62,20 @@ async function createPost(title, content) {
 }
 
 fetchButton.addEventListener('click', fetchPosts);
-
 form.addEventListener('submit', (event) => {
     event.preventDefault();
-    const enteredTitle = event.target.querySelector('#title').value;
-    const enteredContent = event.target.querySelector('#content').value;
+    const enteredTitle = event.currentTarget.querySelector('#title').value;
+    const enteredContent = event.currentTarget.querySelector('#content').value;
 
     createPost(enteredTitle, enteredContent);
-
-    console.log(event.target);
-    console.log(event.currentTarget);
 });
 
-createPost('DUMMY', 'adssafa');
+postList.addEventListener('click', (event) => {
+    if (event.target.tagName === 'BUTTON') {
+        const postId = event.target.closest('li').id;
+        sendHttpRequest(
+            'DELETE',
+            `https://jsonplaceholder.typicode.com/posts/${postId}`
+        );
+    }
+});
