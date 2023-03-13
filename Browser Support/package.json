@@ -1,7 +1,7 @@
 {
-  "name": "javascript-complete-guide",
+  "name": "browser-support",
   "version": "1.0.0",
-  "description": "JavaScript - The Complete Guide",
+  "description": "it demonstrates how to get browser support for features that are not yet available to all browsers",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,7 +9,7 @@
     "build:dev": "webpack-dev-server",
     "build:prod": "webpack --config webpack.config.prod.js"
   },
-  "author": "Maximilian Schwarzmueller",
+  "author": "Ruturaj Bhandari",
   "license": "ISC",
   "browserslist": "> 0.3%, not dead",
   "devDependencies": {
